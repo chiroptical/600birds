@@ -18,7 +18,7 @@ Audio augmentations:
 
 * [X]  ```cyclic_shift()```: Random cyclic shift (equivalent to splitting sample array in two at a random position and switching positions of the two pieces)
 
-* [ ] ```divide_chunk()```:  Randomly divide chunk into segments of duration between 0.5 and 4s
+* [X] ```divide_samples()```:  Randomly divide samples into segments of duration between 0.5 and 4s
 
 * [ ]  ```time_stretch_divisions()```: Local time stretching on divisions: 50% chance of applying time stretching factor randomly chosen from Gaussian(mean = 1, sd=0.05) 
 

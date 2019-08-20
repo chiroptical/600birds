@@ -11,18 +11,26 @@ Functions to use:
 
 Audio augmentations:
 
-* [ ] ```get_chunk()```: Extract chunk of audio at random position in file
+* [X] ```get_chunk()```: Extract chunk of audio at random position in file
      * Wrap around to beginning of file if necessary
      * With 30% chance, select a random position in the chunk, and from that position skip a random number of samples from file, between 0 and the duration of the whole chunk
      * Jitter duration of audio chunk extracted +- 0.5s (results in global stretching when spectrogram is resized to fixed width)
+     * Helper function: ```wraparound_extract()```
 
 * [X]  ```cyclic_shift()```: Random cyclic shift (equivalent to splitting sample array in two at a random position and switching positions of the two pieces)
 
-* [X] ```divide_samples()```:  Randomly divide samples into segments of duration between 0.5 and 4s
+* [X] time shifting & pitch stretching:
 
-* [ ]  ```time_stretch_divisions()```: Local time stretching on divisions: 50% chance of applying time stretching factor randomly chosen from Gaussian(mean = 1, sd=0.05) 
+    * [X]  ```time_stretch_divisions()```: Local time stretching on divisions: 50% chance of applying time stretching factor randomly chosen from Gaussian(mean = 1, sd=0.05) 
 
-* [ ]  ```pitch_shift_divisions()```: Local pitch shifting on divisions: 40% chance of applying pitch shift offset randomly chosen from Gaussian(mean = 0, sd=25 cents [1/8th of a tone])
+    * [X]  ```pitch_shift_divisions()```: Local pitch shifting on divisions: 40% chance of applying pitch shift offset randomly chosen from Gaussian(mean = 0, sd=25 cents [1/8th of a tone])
+
+
+    * [X] Helper functions:
+    * ```divide_samples()```:  Randomly divide samples into segments of duration between 0.5 and 4s
+
+    * ```combine_samples()```:  Simple wrapper function to recombine divided samples
+
 
 * [ ]  ```random_filter()```: with 20% chance, filter audio in time domain with the following options chosen randomly: 
       * Type: lowpass, highpass, bandpass, bandstop 

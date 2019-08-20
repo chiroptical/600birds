@@ -16,7 +16,7 @@ Audio augmentations:
      * With 30% chance, select a random position in the chunk, and from that position skip a random number of samples from file, between 0 and the duration of the whole chunk
      * Jitter duration of audio chunk extracted +- 0.5s (results in global stretching when spectrogram is resized to fixed width)
 
-* [ ]  ```cyclic_shift()```: Random cyclic shift (equivalent to splitting sample array in two at a random position and switching positions of the two pieces)
+* [X]  ```cyclic_shift()```: Random cyclic shift (equivalent to splitting sample array in two at a random position and switching positions of the two pieces)
 
 * [ ] ```divide_chunk()```:  Randomly divide chunk into segments of duration between 0.5 and 4s
 

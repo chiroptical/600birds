@@ -32,7 +32,7 @@ Audio augmentations:
     * ```combine_samples()```:  Simple wrapper function to recombine divided samples
 
 
-* [ ]  ```random_filter()```: with 20% chance, filter audio in time domain with the following options chosen randomly: 
+* [X]  ```random_filter()```: with 20% chance, filter audio in time domain with the following options chosen randomly: 
 
     * Type: lowpass, highpass, bandpass, bandstop 
     * Order: 1-5

@@ -33,6 +33,7 @@ Audio augmentations:
 
 
 * [ ]  ```random_filter()```: with 20% chance, filter audio in time domain with the following options chosen randomly: 
+
       * Type: lowpass, highpass, bandpass, bandstop 
       * Order: 1-5
       * Low cutoff frequency: 1 to sample_rate-3 Hz
@@ -40,6 +41,7 @@ Audio augmentations:
       * If filter output contains anything not between -1.0 and 1.0, return original signal
     
 * [ ] ```sum_chunks()```: Add in noise from other audio chunks & randomize signal amplitude of chunks before summation
+
     * Background: noise from validation files and BAD files
     * Files containing same bird species
     * Files containing different bird species (up to 4 chunks added, along with adding their labels, with conditional probabilities of 50, 40, 30, and 20%)

@@ -45,6 +45,13 @@ Audio augmentations:
     * Background: noise from validation files and BAD files
     * Files containing same bird species
     * Files containing different bird species (up to 4 chunks added, along with adding their labels, with conditional probabilities of 50, 40, 30, and 20%)
+    * Helper functions:
+        
+        * [X] `fade()`: fade audio in or out
+        * [X] `sum_samples()`: perform actual addition of samples
+        * [ ] `sum_labels()`: combine labels
+        * [ ] `select_chunk()`: select chunk from a particular label
+   
    
     
 Image augmentations:

@@ -57,11 +57,17 @@ Audio augmentations:
    
     
 Image augmentations:
-* [ ] ```remove_random_hi_lo_bands()```: Global frequency shifting/stretching by removing additional high and low frequency bands (remove random number of first 10 and last 6 rows)
+* [X] ```remove_random_hi_lo_bands()```: Global frequency shifting/stretching by removing additional high and low frequency bands (remove random number of first 10 and last 6 rows)
 
-* [ ] ```resize_random_cols()```: Piecewise time stretching by resizing random number of columns at random position
+* [ ] ```resize_random_cols()```: 50% chance of piecewise time stretching by resizing random number of columns at random position. 
 
-* [ ] ```resize_random_rows()```: Piecewise frequency stretching by resizing random number of rows at random position
+     * With 50% chance, randomly divide spectrogram into vertical pieces of size between 10 and 100 pixels.
+     * Resize all pieces individually by factor chosen between 0.9 and 1.1
+
+* [ ] ```resize_random_rows()```: 40% chance of piecewise frequency stretching by resizing random number of rows at random position
+
+     * With 40% chance, randomly divide spectrogram into horizontal pieces of size between 10 and 100 pixels
+     * Resize all pieces individually by a factor between 0.95 and 1.15
 
 * [ ] ```resize_spect_random_filter()```: Different interpolation filters for spectrogram resizing: 85% chance of using Lanczos filter; 15% chance of using a different resampling filter from the python imaging library (Nearest, Box, Bilinear, Hamming, Bicubic)
 

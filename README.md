@@ -29,9 +29,9 @@ Audio augmentations:
 
 
     * [X] Helper functions:
-    * ```divide_samples()```:  Randomly divide samples into segments of duration between 0.5 and 4s
+       * ```divide_samples()```:  Randomly divide samples into segments of duration between 0.5 and 4s
 
-    * ```combine_samples()```:  Simple wrapper function to recombine divided samples
+       * ```combine_samples()```:  Simple wrapper function to recombine divided samples
 
 
 * [X]  ```random_filter()```: with 20% chance, filter audio in time domain with the following options chosen randomly: 
@@ -61,8 +61,8 @@ Image augmentations:
 
 * [ ] ```resize_random_cols()```: 50% chance of piecewise time stretching by resizing random number of columns at random position. 
 
-     * With 50% chance, randomly divide spectrogram into vertical pieces of size between 10 and 100 pixels.
-     * Resize all pieces individually by factor chosen between 0.9 and 1.1
+   * With 50% chance, randomly divide spectrogram into vertical pieces of size between 10 and 100 pixels.
+   * Resize all pieces individually by factor chosen between 0.9 and 1.1
 
 * [ ] ```resize_random_rows()```: 40% chance of piecewise frequency stretching by resizing random number of rows at random position
 

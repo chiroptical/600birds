@@ -2,10 +2,12 @@
 Modules for augmentation of wildlife recording data. These augmentation techniques are used in Mario Lasseck's entries to the BirdCLEF machine learning competition.
 
 Functions to use:
-* Apply short-time Fourier transform
-* Transform spectrogram to decibel units using logarithm (window size = 1536, hop length = 360)
-* Convert to mel spectrogram
-* Remove low and high frequencies (160Hz < x < 10300Hz)
+* [X] ```make_spectrogram()```: 
+    * Apply short-time Fourier transform 
+    * Create mel spectrogram
+    * Transform spectrogram to decibel units using logarithm (window size = 1536, hop length = 360)
+    * Remove low and high frequencies (160Hz < x < 10300Hz)
+    
 * Resize spectrogram to network dimensions
 * Convert grayscale image to RGB image
 

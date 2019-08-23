@@ -8,8 +8,8 @@ Functions to use:
     * Transform spectrogram to decibel units using logarithm (window size = 1536, hop length = 360)
     * Remove low and high frequencies (160Hz < x < 10300Hz)
     
-* Resize spectrogram to network dimensions
-* Convert grayscale image to RGB image
+* [ ] Resize spectrogram to network dimensions
+* [ ] Convert grayscale image to RGB image
 
 Audio augmentations:
 

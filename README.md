@@ -59,7 +59,7 @@ Audio augmentations:
 Image augmentations:
 * [X] ```remove_random_hi_lo_bands()```: Global frequency shifting/stretching by removing additional high and low frequency bands (remove random number of first 10 and last 6 rows)
 
-* ```resize_random()```: Implemented as one function
+* [X] ```resize_random_bands()```: Implemented as one function
    * Resize random columns: 50% chance of piecewise time stretching by resizing random number of columns at random position. 
 
       * With 50% chance, randomly divide spectrogram into vertical pieces of size between 10 and 100 pixels.

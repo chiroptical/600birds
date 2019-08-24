@@ -1,16 +1,6 @@
 # sound-augmentation
 Modules for augmentation of wildlife recording data. These augmentation techniques are used in Mario Lasseck's entries to the BirdCLEF machine learning competition.
 
-Functions to use:
-* [X] ```make_spectrogram()```: 
-    * Apply short-time Fourier transform 
-    * Create mel spectrogram
-    * Transform spectrogram to decibel units using logarithm (window size = 1536, hop length = 360)
-    * Remove low and high frequencies (160Hz < x < 10300Hz)
-    
-* [ ] Resize spectrogram to network dimensions
-* [ ] Convert grayscale image to RGB image
-
 Audio augmentations:
 
 * [X] ```get_chunk()```: Extract chunk of audio at random position in file
@@ -55,6 +45,14 @@ Audio augmentations:
         * [ ] `select_chunk()`: select chunk from a particular label
    
    
+Image helper functions:
+
+* [X] ```make_spectrogram()```: 
+    * Apply short-time Fourier transform 
+    * Create mel spectrogram
+    * Transform spectrogram to decibel units using logarithm (window size = 1536, hop length = 360)
+    * Remove low and high frequencies (160Hz < x < 10300Hz)
+
     
 Image augmentations:
 * [X] ```remove_random_hi_lo_bands()```: Global frequency shifting/stretching by removing additional high and low frequency bands (remove random number of first 10 and last 6 rows)
@@ -70,9 +68,9 @@ Image augmentations:
         * With 40% chance, randomly divide spectrogram into horizontal pieces of size between 10 and 100 pixels
         * Resize all pieces individually by a factor between 0.95 and 1.15
 
-* [ ] ```resize_spect_random_filter()```: Different interpolation filters for spectrogram resizing: 85% chance of using Lanczos filter; 15% chance of using a different resampling filter from the python imaging library (Nearest, Box, Bilinear, Hamming, Bicubic)
+* [X] ```resize_spect_random_interpolation()```: Different interpolation filters for spectrogram resizing: 85% chance of using Lanczos filter; 15% chance of using a different resampling filter from the python imaging library (Nearest, Box, Bilinear, Hamming, Bicubic)
 
-* [ ] ```color_jitter()```: Color jitter (brightness, contrast, saturation: factor 0.3; hue: factor 0.01)
+* [X] ```color_jitter()```: Color jitter (brightness, contrast, saturation: factor 0.3; hue: factor 0.01)
 
 The 2018 challenge took a very different approach to the "audio chunk summation" part of the audio augmentation.  This approach was not used in the 2019 challenge because of the availability of annotated noise/background data. The augmentations included:
 * Different sources of summed audio chunks: instead of using annotated noise/background segments from validation files, use image processing to roughly segment training files into "background" and "foreground"

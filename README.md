@@ -3,28 +3,30 @@ Modules for augmentation of wildlife recording data. These augmentation techniqu
 
 Audio augmentations:
 
-* [X] ```get_chunk()```: Extract chunk of audio at random position in file
+* [X] `get_chunk()`: Extract chunk of audio at random position in file
      * Wrap around to beginning of file if necessary
      * With 30% chance, select a random position in the chunk, and from that position skip a random number of samples from file, between 0 and the duration of the whole chunk
      * Jitter duration of audio chunk extracted +- 0.5s (results in global stretching when spectrogram is resized to fixed width)
-     * Helper function: ```wraparound_extract()```
+     * Helper functions:
+          * [X] `wraparound_extract()`
+          * [ ] `discard_empty()`: do not use the file if it doesn't contain any vocalizations
 
-* [X]  ```cyclic_shift()```: Random cyclic shift (equivalent to splitting sample array in two at a random position and switching positions of the two pieces)
+* [X]  `cyclic_shift()`: Random cyclic shift (equivalent to splitting sample array in two at a random position and switching positions of the two pieces)
 
 * [X] time shifting & pitch stretching:
 
-    * [X]  ```time_stretch_divisions()```: Local time stretching on divisions: 50% chance of applying time stretching factor randomly chosen from Gaussian(mean = 1, sd=0.05) 
+    * [X]  `time_stretch_divisions()`: Local time stretching on divisions: 50% chance of applying time stretching factor randomly chosen from Gaussian(mean = 1, sd=0.05) 
 
-    * [X]  ```pitch_shift_divisions()```: Local pitch shifting on divisions: 40% chance of applying pitch shift offset randomly chosen from Gaussian(mean = 0, sd=25 cents [1/8th of a tone])
+    * [X]  `pitch_shift_divisions()`: Local pitch shifting on divisions: 40% chance of applying pitch shift offset randomly chosen from Gaussian(mean = 0, sd=25 cents [1/8th of a tone])
 
 
     * [X] Helper functions:
-       * ```divide_samples()```:  Randomly divide samples into segments of duration between 0.5 and 4s
+       * `divide_samples()`:  Randomly divide samples into segments of duration between 0.5 and 4s
 
-       * ```combine_samples()```:  Simple wrapper function to recombine divided samples
+       * `combine_samples()`:  Simple wrapper function to recombine divided samples
 
 
-* [X]  ```random_filter()```: with 20% chance, filter audio in time domain with the following options chosen randomly: 
+* [X]  `random_filter()`: with 20% chance, filter audio in time domain with the following options chosen randomly: 
 
     * Type: lowpass, highpass, bandpass, bandstop 
     * Order: 1-5
@@ -47,7 +49,7 @@ Audio augmentations:
    
 Image helper functions:
 
-* [X] ```make_spectrogram()```: 
+* [X] `make_spectrogram()`: 
     * Apply short-time Fourier transform 
     * Create mel spectrogram
     * Transform spectrogram to decibel units using logarithm (window size = 1536, hop length = 360)
@@ -55,9 +57,9 @@ Image helper functions:
 
     
 Image augmentations:
-* [X] ```remove_random_hi_lo_bands()```: Global frequency shifting/stretching by removing additional high and low frequency bands (remove random number of first 10 and last 6 rows)
+* [X] `remove_random_hi_lo_bands()`: Global frequency shifting/stretching by removing additional high and low frequency bands (remove random number of first 10 and last 6 rows)
 
-* [X] ```resize_random_bands()```: Implemented as one function
+* [X] `resize_random_bands()`: Implemented as one function
    * Resize random columns: 50% chance of piecewise time stretching by resizing random number of columns at random position. 
 
       * With 50% chance, randomly divide spectrogram into vertical pieces of size between 10 and 100 pixels.
@@ -68,9 +70,9 @@ Image augmentations:
         * With 40% chance, randomly divide spectrogram into horizontal pieces of size between 10 and 100 pixels
         * Resize all pieces individually by a factor between 0.95 and 1.15
 
-* [X] ```resize_spect_random_interpolation()```: Different interpolation filters for spectrogram resizing: 85% chance of using Lanczos filter; 15% chance of using a different resampling filter from the python imaging library (Nearest, Box, Bilinear, Hamming, Bicubic)
+* [X] `resize_spect_random_interpolation()`: Different interpolation filters for spectrogram resizing: 85% chance of using Lanczos filter; 15% chance of using a different resampling filter from the python imaging library (Nearest, Box, Bilinear, Hamming, Bicubic)
 
-* [X] ```color_jitter()```: Color jitter (brightness, contrast, saturation: factor 0.3; hue: factor 0.01)
+* [X] `color_jitter()`: Color jitter (brightness, contrast, saturation: factor 0.3; hue: factor 0.01)
 
 The 2018 challenge took a very different approach to the "audio chunk summation" part of the audio augmentation.  This approach was not used in the 2019 challenge because of the availability of annotated noise/background data. The augmentations included:
 * Different sources of summed audio chunks: instead of using annotated noise/background segments from validation files, use image processing to roughly segment training files into "background" and "foreground"

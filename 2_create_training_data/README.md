@@ -1,5 +1,4 @@
-# sound-augmentation
-Modules for augmentation of wildlife recording data. These augmentation techniques are used in Mario Lasseck's entries to the BirdCLEF machine learning competition.
+Create training data (spectrograms containing ~5s of labeled audio) using [data augmentation procedures](http://ceur-ws.org/Vol-2380/paper_86.pdf) developed by Mario Lasseck.
 
 Audio augmentations:
 

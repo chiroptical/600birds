@@ -1,0 +1,1 @@
+Recordings are downloaded from Xeno-Canto.org. The Xeno-Canto servers are not designed for bulk download; to avoid overloading these servers, we have chosen not to make downloading scripts publicly available. However, the scripts are available on request; contact Tessa Rhinehart to obtain them.

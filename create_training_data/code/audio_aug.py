@@ -44,7 +44,8 @@ class Audio():
     global audio_manipulations
         
     def __repr__(self):
-        return f'Audio({self.sources}, {self.labels})'
+        sources = [source[0] for source in self.sources]
+        return f'Audio({sources})'
     
     def __init__(self, label, path = None, samples = None, sample_rate = None):
 

@@ -43,11 +43,14 @@ class Spectrogram():
         # Filled by class methods
         self.manipulations = []
         self.sources = []
-        
     
         # Set self.audio, self.samples, self.sample_rate, self.labels
         self._set_audio(audio)
  
+
+    def __repr__(self):
+        sources = [source[0] for source in self.audio.sources]
+        return f'Spectrogram({sources})'
         
     def _set_audio(self, audio):
          
@@ -60,7 +63,8 @@ class Spectrogram():
         self.labels = audio.labels
         
         for source in audio.sources:
-            self.add_source(source)
+            self.add_source(source = source)
+
 
     def set_spect_attrs(self, mel, spect, freqs = None, times = None):
         '''
@@ -151,7 +155,7 @@ class Spectrogram():
         '''
         
         # Validate all inputs were given
-
+        
         # If using source
         if source:
             if (not isinstance(source, tuple)) or len(source) != 2:

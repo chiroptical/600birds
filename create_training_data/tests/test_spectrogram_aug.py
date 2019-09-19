@@ -6,6 +6,9 @@ import inspect
 from ..code.audio_aug import Audio
 from ..code.spectrogram_aug import *
 
+# Helper functions
+from ..code.spectrogram_aug import _remove_bands, _resize_bands
+
 ####################################################
 #################### Helpers ######################
 ####################################################
@@ -379,7 +382,7 @@ def test_spectrogram_test_passes_good_manipulation_addition(spect_ex):
 def test_remove_bands_first_hi_and_last_two():
     # Remove the first band and the last two
     
-    removed = remove_bands(
+    removed = _remove_bands(
         np.array([
             [0, 0, 0, 0],
             [1, 1, 1, 1],
@@ -404,7 +407,7 @@ def test_remove_bands_all():
         [3, 3, 3, 3],
         [4, 4, 4, 4]])
     empty_array = base_array[0:0]
-    removed = remove_bands(
+    removed = _remove_bands(
         base_array,
         min_lo = 1,
         max_lo = 1,
@@ -421,7 +424,7 @@ def test_remove_bands_check_vals():
     # Ensure value checking of min/max bands to remove
     # Min should be less than max
     with pytest.raises(ValueError):
-        test = remove_bands(
+        test = _remove_bands(
             np.array([[0, 0, 0, 0]]),
             min_lo = 2,
             max_lo = 1,
@@ -432,7 +435,7 @@ def test_remove_bands_check_vals():
 
     # Can't remove negative bands
     with pytest.raises(ValueError):
-        test = remove_bands(
+        test = _remove_bands(
             np.array([[0, 0, 0, 0]]),
             min_hi = -2,
             max_hi = 2,
@@ -443,7 +446,7 @@ def test_remove_bands_check_vals():
 
     # Can't remove more bands than exist in spectrogram
     with pytest.raises(ValueError): 
-        test = remove_bands(
+        test = _remove_bands(
             np.array([[0, 0, 0, 0]]),
             min_lo = 2,
             min_hi = 2,
@@ -462,7 +465,7 @@ def test_resize_bands_cols():
         [0, 0, 1, 1],
         [1, 1, 1, 1]])
 
-    stretched_2x = np.rint(resize_bands(
+    stretched_2x = np.rint(_resize_bands(
         array = test_arr,
         rows_or_cols = 'cols',
         chance_resize = 1,
@@ -486,7 +489,7 @@ def test_resize_bands_rows():
         [1, 1],
         [1, 1]])
 
-    stretched_2x = np.rint(resize_bands(
+    stretched_2x = np.rint(_resize_bands(
         array = test_arr,
         rows_or_cols = 'rows',
         chance_resize = 1,

@@ -2,7 +2,15 @@ import os
 import pytest
 import numpy.testing as npt
 import inspect
+
+# Main functions
 from ..code.audio_aug import *
+
+# Private helper functions
+from ..code.audio_aug import (
+    _wraparound_extract, _shift_array, _divide_samples,
+    _combine_samples, _fade, _sum_samples, _select_chunk
+)
 
 TEST_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -201,30 +209,28 @@ def test_audio_manipulation_test_passes_good_manipulation_addition(audio_ex):
     
 def test_wraparound_extract():
     # test zero beginning, not getting to end of original array
-    npt.assert_array_equal(wraparound_extract(original = np.array([0, 1]), begin = 0, length = 1), np.array([0]))
+    npt.assert_array_equal(_wraparound_extract(original = np.array([0, 1]), begin = 0, length = 1), np.array([0]))
 
     # test zero beginning, not getting to end of original array
-    npt.assert_array_equal(wraparound_extract(original = np.array([0, 1]), begin = 0, length = 2), np.array([0, 1]))
+    npt.assert_array_equal(_wraparound_extract(original = np.array([0, 1]), begin = 0, length = 2), np.array([0, 1]))
 
     # test zero beginning, not wrapping
-    npt.assert_array_equal(wraparound_extract(original = np.array([0, 1]), begin = 0, length = 2), np.array([0, 1]))
+    npt.assert_array_equal(_wraparound_extract(original = np.array([0, 1]), begin = 0, length = 2), np.array([0, 1]))
 
     # test zero beginning, wrapping around
-    npt.assert_array_equal(wraparound_extract(original = np.array([0, 1]), begin = 0, length = 3), np.array([0, 1, 0]))
+    npt.assert_array_equal(_wraparound_extract(original = np.array([0, 1]), begin = 0, length = 3), np.array([0, 1, 0]))
 
     # test nonzero beginning, not wrapping
-    npt.assert_array_equal(wraparound_extract(original = np.array([0, 1]), begin = 1, length = 1), np.array([1]))
+    npt.assert_array_equal(_wraparound_extract(original = np.array([0, 1]), begin = 1, length = 1), np.array([1]))
 
     # test nonzero beginning, wrapping around
-    npt.assert_array_equal(wraparound_extract(original = np.array([0, 1]), begin = 1, length = 3), np.array([1, 0, 1]))
+    npt.assert_array_equal(_wraparound_extract(original = np.array([0, 1]), begin = 1, length = 3), np.array([1, 0, 1]))
 
     # test multiwrap
-    npt.assert_array_equal(wraparound_extract(original = np.array([0, 1]), begin = 1, length = 10), np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0]))
+    npt.assert_array_equal(_wraparound_extract(original = np.array([0, 1]), begin = 1, length = 10), np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0]))
 
     # test wrapping around beginning
-    npt.assert_array_equal(wraparound_extract(original = np.array([0, 1]), begin = 5, length = 3), np.array([1, 0, 1]))
-
-test_wraparound_extract()
+    npt.assert_array_equal(_wraparound_extract(original = np.array([0, 1]), begin = 5, length = 3), np.array([1, 0, 1]))
 
 
 
@@ -233,13 +239,13 @@ test_wraparound_extract()
 def test_array_shifting():
     # Test random splitting
     random.seed(100)
-    npt.assert_array_equal(shift_array(np.array((0, 1, 2, 3, 4, 5, 6, 7))), np.array([2, 3, 4, 5, 6, 7, 0, 1]))
+    npt.assert_array_equal(_shift_array(np.array((0, 1, 2, 3, 4, 5, 6, 7))), np.array([2, 3, 4, 5, 6, 7, 0, 1]))
 
     # Test deterministic splitting
-    npt.assert_array_equal(shift_array(np.array([0, 1, 2]), split_point=0.5), np.array([1, 2, 0]))
+    npt.assert_array_equal(_shift_array(np.array([0, 1, 2]), split_point=0.5), np.array([1, 2, 0]))
 
     # Test deterministic splitting
-    npt.assert_array_equal(shift_array(np.array([0, 1, 2, 3]), split_point=0.5), np.array([2, 3, 0, 1]))
+    npt.assert_array_equal(_shift_array(np.array([0, 1, 2, 3]), split_point=0.5), np.array([2, 3, 0, 1]))
 test_array_shifting()
 
 
@@ -252,7 +258,7 @@ def test_divide_samples_at_set_amount():
     array2 = np.array([2])
     all_arrays = (array0, array1, array2)
     cat_arrays = np.concatenate(all_arrays)
-    divisions = divide_samples(samples=cat_arrays, sample_rate=1, low_duration=3, high_duration=3)
+    divisions = _divide_samples(samples=cat_arrays, sample_rate=1, low_duration=3, high_duration=3)
     
     for idx, division in enumerate(divisions):
         npt.assert_array_equal(division, all_arrays[idx])
@@ -266,7 +272,7 @@ def test_divide_samples_at_random_position():
     predetermined = [np.array([0, 1, 2, 3, 4, 5, 6, 7]), np.array([8, 9])]
 
     range_10 = np.array(range(10))
-    divisions = divide_samples(samples=range_10, sample_rate=1, low_duration=0, high_duration=10)
+    divisions = _divide_samples(samples=range_10, sample_rate=1, low_duration=0, high_duration=10)
     
     for idx, result in enumerate(divisions):
         npt.assert_array_equal(result, predetermined[idx])
@@ -275,8 +281,8 @@ def test_combine_samples():
     # Test that divided samples can be recombined successfully
     
     samples, sr = librosa.load(os.path.join(TEST_PATH, 'silence_10s.mp3'))
-    divided = divide_samples(samples, sample_rate=sr, low_duration=0.5, high_duration=4)
-    npt.assert_array_equal(combine_samples(divided), samples)
+    divided = _divide_samples(samples, sample_rate=sr, low_duration=0.5, high_duration=4)
+    npt.assert_array_equal(_combine_samples(divided), samples)
     
 def test_random_time_stretching():
     audio = Audio(samples = np.linspace(0, 1, 10), sample_rate=1, label = 'test')
@@ -337,28 +343,28 @@ def test_filter_err_checking(audio_ex):
 
 def test_only_binary_start_amp():
     with pytest.raises(ValueError):
-        fade(array = np.array((1, 1, 1)), fade_len=3, start_amp=1.0)
+        _fade(array = np.array((1, 1, 1)), fade_len=3, start_amp=1.0)
     with pytest.raises(ValueError):
-        fade(array = np.array((1, 1, 1)), fade_len=3, start_amp=True)
+        _fade(array = np.array((1, 1, 1)), fade_len=3, start_amp=True)
 
 # Assert that fading out doesn't work if fade_len is too long
 def test_fade_too_long():
     with pytest.raises(IndexError):
-        fade(array = np.array((1, 1, 1, 1, 1)), fade_len=6, start_amp=1)
+        _fade(array = np.array((1, 1, 1, 1, 1)), fade_len=6, start_amp=1)
         
 # Fade in on array exactly the same length as fade_len
 def test_fade_on_exact_length_array():
-    fade_in = fade(array = np.array((1, 1, 1, 1, 1)), fade_len=5, start_amp=0)
+    fade_in = _fade(array = np.array((1, 1, 1, 1, 1)), fade_len=5, start_amp=0)
     npt.assert_array_equal(fade_in, np.array([0., 0.25, 0.5, 0.75, 1.]))
 
 # Fade out array longer than fade_len
 def test_fade_on_long_array():
-    fade_out = fade(array = np.array((1, 1, 1, 1, 1, 1, 1)), fade_len=5, start_amp=1)
+    fade_out = _fade(array = np.array((1, 1, 1, 1, 1, 1, 1)), fade_len=5, start_amp=1)
     npt.assert_array_equal(fade_out, np.array([1., 1., 1., 0.75, 0.5, 0.25, 0.]))
     
 def test_wrap_fade_combos():
     # Test fade & wraparound on audio-like numpy arrays
-    nowrap_nofade = sum_samples(
+    nowrap_nofade = _sum_samples(
         samples_original = np.array((1., 1., 500.)),
         samples_new = np.array((10., 11.)),
         sample_rate = 1,
@@ -367,7 +373,7 @@ def test_wrap_fade_combos():
     )
     npt.assert_array_equal(nowrap_nofade, np.array([11., 12.,  500.]))
 
-    nowrap_fade = sum_samples(
+    nowrap_fade = _sum_samples(
         samples_original = np.array((1., 1., 1., 500.)),
         samples_new = np.array((10., 10.)),
         sample_rate = 1,
@@ -376,7 +382,7 @@ def test_wrap_fade_combos():
     )
     npt.assert_array_equal(nowrap_fade, np.array([ 11.,   1.,   1., 500.]))
 
-    wrap_nofade = sum_samples(
+    wrap_nofade = _sum_samples(
         samples_original = np.array((1., 1., 500.)),
         samples_new = np.array((10., 11.)),
         sample_rate = 1,
@@ -386,7 +392,7 @@ def test_wrap_fade_combos():
     npt.assert_array_equal(wrap_nofade, np.array([11., 12.,  510.]))
 
     # Same behavior as wrap_nofade
-    wrap_fade = sum_samples(
+    wrap_fade = _sum_samples(
         samples_original = np.array((1., 1., 500.)),
         samples_new = np.array((10., 11.)),
         sample_rate = 1,
@@ -404,7 +410,7 @@ def test_fade_on_actual_audio(audio_ex):
     samples_original = audio_original.samples[:22050]
     samples_new = audio_new.samples[:11025]
 
-    summed = sum_samples(
+    summed = _sum_samples(
         samples_original = samples_original,
         samples_new = samples_new,
         sample_rate = audio_original.sample_rate,

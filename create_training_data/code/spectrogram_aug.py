@@ -350,7 +350,7 @@ def make_linear_spectrogram(
 ####################################################
 # Removing high/low spectrogram rows
 
-def remove_bands(array, min_lo, max_lo, min_hi, max_hi):
+def _remove_bands(array, min_lo, max_lo, min_hi, max_hi):
     
     # Ensure sensible hi/lo bands
     values = [min_lo, max_lo, min_hi, max_hi]
@@ -387,14 +387,14 @@ def remove_random_hi_lo_bands(
         raise SpectrogramNotComputedError('spectrogram.spect has not been computed.'
                         ' Use make_mel_spectrogram or make_linear_spectrogram')
     
-    spectrogram.spect = remove_bands(spectrogram.spect, **options)
+    spectrogram.spect = _remove_bands(spectrogram.spect, **options)
     
     return spectrogram, options
 
 ####################################################
 # Resize random columns/rows
 
-def resize_bands(
+def _resize_bands(
     array,
     rows_or_cols,
     chance_resize,
@@ -522,7 +522,7 @@ def resize_random_bands(
                                          ' Use make_mel_spectrogram or make_linear_spectrogram')
     
     
-    spectrogram.spect = resize_bands(array = spectrogram.spect, **options)
+    spectrogram.spect = _resize_bands(array = spectrogram.spect, **options)
     
     return spectrogram, options
 

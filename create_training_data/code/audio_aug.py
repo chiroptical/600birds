@@ -273,7 +273,7 @@ def audio_manipulation(func):
 ####################################################
 ################# Chunk extraction #################
 
-def wraparound_extract(original, begin, length):
+def _wraparound_extract(original, begin, length):
     '''
     Extracts elements from numpy.array in a "wraparound" fashion
     
@@ -284,7 +284,7 @@ def wraparound_extract(original, begin, length):
     "wraps around" to the beginning of the numpy.array
     as many times as necessary. For instance:
     
-    wraparound_extract(
+    _wraparound_extract(
         original = [0, 5, 10],
         begin = 1, 
         length = 7) -> [5, 10, 0, 5, 10, 0, 5]
@@ -392,13 +392,13 @@ def get_chunk(
         chunk_2_start = chunk_1_end + amount_to_skip
         chunk_2_end = chunk_1_start + (samples_to_extract - position_to_skip)
         
-        chunk_1 = wraparound_extract(audio.samples, chunk_1_start, chunk_1_end)
-        chunk_2 = wraparound_extract(audio.samples, chunk_2_start, chunk_2_end)
+        chunk_1 = _wraparound_extract(audio.samples, chunk_1_start, chunk_1_end)
+        chunk_2 = _wraparound_extract(audio.samples, chunk_2_start, chunk_2_end)
         chunk = np.concatenate((chunk_1, chunk_2))
     
     # Otherwise get contiguous chunk
     else:
-        chunk = wraparound_extract(audio.samples, start_position, samples_to_extract) 
+        chunk = _wraparound_extract(audio.samples, start_position, samples_to_extract) 
         
     start_position_seconds = start_position / audio.sample_rate
     start_and_len = (start_position_seconds, seconds_to_extract)
@@ -417,7 +417,7 @@ def get_chunk(
 ####################################################
 ##################### Cyclic shift #################
 
-def shift_array(array, split_point = None):
+def _shift_array(array, split_point = None):
     '''
     Shift array cyclicly by a random amount
     
@@ -460,7 +460,7 @@ def cyclic_shift(audio, split_point = None):
     options = locals()
     del options['audio']
     
-    new_samples = shift_array(audio.samples, split_point = split_point)
+    new_samples = _shift_array(audio.samples, split_point = split_point)
     
     audio.set_samples(new_samples)
     
@@ -471,7 +471,7 @@ def cyclic_shift(audio, split_point = None):
 ###### Divided pitch shift/time stretch ############
 
 
-def divide_samples(
+def _divide_samples(
     samples,
     sample_rate,
     low_duration = 0.5,
@@ -511,7 +511,7 @@ def divide_samples(
     return segments
 
 
-def combine_samples(divided):
+def _combine_samples(divided):
     '''
     Recombine divided sample arrays
     
@@ -521,7 +521,7 @@ def combine_samples(divided):
     
     Args:
         divided (list of np.ndarrays): list of sample arrays
-            divided by divide_samples()
+            divided by _divide_samples()
     
     Returns:
         sample arrays concatenated back into a single array
@@ -566,7 +566,7 @@ def time_stretch_divisions(
     
     samples = audio.samples
     sample_rate = audio.sample_rate
-    divisions = divide_samples(
+    divisions = _divide_samples(
         samples,
         sample_rate = sample_rate, 
         low_duration = low_division_duration,
@@ -585,7 +585,7 @@ def time_stretch_divisions(
                 stretched_d = librosa.effects.time_stretch(y = stretched_d, rate = stretch_factor)
         stretched_divisions.append(stretched_d)
     
-    recombined = combine_samples(stretched_divisions)
+    recombined = _combine_samples(stretched_divisions)
     audio.set_samples(recombined)
     
     return audio, options
@@ -631,7 +631,7 @@ def pitch_shift_divisions(
     
     samples = audio.samples
     sample_rate = audio.sample_rate
-    divisions = divide_samples(
+    divisions = _divide_samples(
         samples,
         sample_rate = sample_rate, 
         low_duration = low_division_duration,
@@ -652,7 +652,7 @@ def pitch_shift_divisions(
             
         shifted_divisions.append(shifted_d)
         
-    recombined = combine_samples(shifted_divisions)
+    recombined = _combine_samples(shifted_divisions)
     audio.set_samples(recombined)
     
     return audio, options
@@ -733,7 +733,7 @@ def random_filter(
 ####################################################
 ################ Adding audio chunks ###############
 
-def fade(array, fade_len, start_amp=1):
+def _fade(array, fade_len, start_amp=1):
     '''
     Fade audio in or out
     
@@ -780,7 +780,7 @@ def fade(array, fade_len, start_amp=1):
         )
     return np.multiply(array, fade_filter_padded)
 
-def sum_samples(
+def _sum_samples(
     samples_original,
     samples_new,
     sample_rate,
@@ -823,7 +823,7 @@ def sum_samples(
     if discrepancy > 0: # if new_len shorter than original_len
         # Make up length by repeating/"wrapping around"
         if wraparound_fill:
-            samples_to_add = wraparound_extract(
+            samples_to_add = _wraparound_extract(
                 original = samples_new,
                 begin = 0,
                 length = original_len)
@@ -837,7 +837,7 @@ def sum_samples(
                 if fade_samples > new_len: fade_samples = new_len
 
                 # Apply fade
-                samples_to_add = fade(
+                samples_to_add = _fade(
                     array = samples_to_add,
                     fade_len = fade_samples,
                     start_amp = 1,
@@ -855,7 +855,7 @@ def sum_samples(
         
     return np.add(samples_original, samples_to_add)
 
-def select_chunk(
+def _select_chunk(
     chunk_source,
     label,
     start_position = None,
@@ -990,7 +990,7 @@ def sum_chunks(
 
         # Randomly grab chunk from source
         chunk_source == label_dict[label]
-        new_chunk = select_chunk(
+        new_chunk = _select_chunk(
             chunk_source = chunk_source,
             label = label,
             start_position = start_position,
@@ -1004,7 +1004,7 @@ def sum_chunks(
         new_chunk.set_samples(np.multiply(new_chunk.samples, amp_modifier))
         
         # Add chunks together
-        summed_samples = sum_samples(
+        summed_samples = _sum_samples(
             samples_original = audio.samples,
             samples_new = new_chunk.samples,
             sample_rate = sample_rate,

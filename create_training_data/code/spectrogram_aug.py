@@ -363,16 +363,20 @@ def _remove_bands(array, min_lo, max_lo, min_hi, max_hi):
             raise ValueError('Number of bands to remove must be positive')
     if (min_lo > max_lo) or (min_hi > max_hi):
         raise ValueError('Minimum number of bands to remove must be less than or equal to maximum')
-    if max_lo + max_hi > array.shape[0]:
-        raise ValueError('Maximum number of bands to remove cannot be greater than number of bands in spectrogram')
+    if max_lo + max_hi >= array.shape[0]:
+        raise ValueError('Maximum number of bands to remove cannot be greater than or equal to number of bands in spectrogram')
+
     
+    # Note the high-frequency bands are the last bands in the spectrogram
     hi_remove = random.randint(min_hi, max_hi)
     lo_remove = random.randint(min_lo, max_lo)
+
+    if hi_remove == 0:
+        return array[lo_remove:]
+    else:
+        return array[lo_remove:-hi_remove]
+
     
-    # The high-frequency bands are the last bands in the spectrogram
-    return array[lo_remove:-hi_remove]
-
-
 @spectrogram_manipulation
 def remove_random_hi_lo_bands(
     spectrogram,

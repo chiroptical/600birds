@@ -399,25 +399,7 @@ def test_remove_bands_first_hi_and_last_two():
         [1, 1, 1, 1],
         [2, 2, 2, 2]]))
 test_remove_bands_first_hi_and_last_two()
-    
-def test_remove_bands_all():
-    # Remove everything!
-    base_array = np.array([
-        [0, 0, 0, 0],
-        [3, 3, 3, 3],
-        [4, 4, 4, 4]])
-    empty_array = base_array[0:0]
-    removed = _remove_bands(
-        base_array,
-        min_lo = 1,
-        max_lo = 1,
-        min_hi = 2,
-        max_hi = 2
-    )
-    npt.assert_array_equal(removed, empty_array)
-test_remove_bands_all()
-
-
+  
 
 # Other tests of spectrogram manipulation funcs
 def test_remove_bands_check_vals():
@@ -446,13 +428,37 @@ def test_remove_bands_check_vals():
 
     # Can't remove more bands than exist in spectrogram
     with pytest.raises(ValueError): 
+        # Attempt to remove exactly two bands
         test = _remove_bands(
             np.array([[0, 0, 0, 0]]),
-            min_lo = 2,
-            min_hi = 2,
-            max_lo = 10,
-            max_hi = 10
+            min_lo = 1,
+            min_hi = 1,
+            max_lo = 1,
+            max_hi = 1
         )
+        
+    # Can't remove all bands in spectrogram
+    with pytest.raises(ValueError): 
+        # Attempt to remove exactly one band
+        test = _remove_bands(
+            np.array([[0, 0, 0, 0]]),
+            min_lo = 0,
+            min_hi = 0,
+            max_lo = 1,
+            max_hi = 1
+        )
+        
+def test_remove_bands_remove_no_bands():
+    array = np.array([1, 2, 3, 4])
+    test = _remove_bands(
+        array = array,
+        min_lo = 0,
+        min_hi = 0,
+        max_lo = 0,
+        max_hi = 0
+    )
+    npt.assert_array_equal(test, array)
+    
 
 
 def test_resize_bands_cols():

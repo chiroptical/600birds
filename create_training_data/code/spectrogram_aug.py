@@ -20,6 +20,11 @@ spectrogram_manipulations = []
 ####################################################
 
 class Spectrogram():
+    
+    __slots__ = ["audio", "sample_rate", "samples", "labels", 
+                 "mel", "spect_settings", "spect", "times", "freqs",
+                "possible_manipulations", "manipulations", "sources"]
+    
     def __init__(self, audio = None, mel = False, spect_settings = 'default'):
         '''
         Set up a Spectrogram object but do not create spectrogram
@@ -579,7 +584,6 @@ def resize_random_bands(
     
     
     spectrogram.spect = _resize_bands(array = spectrogram.spect, **options)
-    
     return spectrogram, options
 
 
@@ -628,7 +632,7 @@ def resize_spect_random_interpolation(
         raise ValueError('spectrogram.spect already converted to image.')
     
     spect = spectrogram.spect
-
+    
     if width is None:
         width = spect.shape[0]
     if height is None:
@@ -640,24 +644,25 @@ def resize_spect_random_interpolation(
     # Make spectrogram pleasing to human eye (flip vertically, convert to db)
     spect = librosa.power_to_db(spect[::-1, ...]) 
     
+    
     # Convert spectrogram to image
     spect = spect.astype(np.uint8) # Convert to needed type
     spect_image = PIL.Image.fromarray(spect)
     spect_image = PIL.ImageOps.invert(spect_image) # Invert colors
-
+    
     # Randomly choose interpolation
     if random.random() > chance_random_interpolation:
         interpolation = PIL.Image.LANCZOS
     else:
         interpolation = random.choice([
             PIL.Image.BOX,
-            PIL.Image.NEAREST,
+            PIL.Image.NEAREST, # Note: NEAREST provides the nicest-looking spectrograms.
             PIL.Image.BILINEAR,
             PIL.Image.HAMMING,
             PIL.Image.BICUBIC
         ])
 
-    resized = spect_image.resize((width, height), interpolation) 
+    resized = spect_image.resize((width, height), interpolation)
     rgb = resized.convert('RGB')
     spectrogram.spect = rgb
     
@@ -703,7 +708,7 @@ def color_jitter(
     '''
     options = locals()
     del options['spectrogram']
-    
+
     spect = spectrogram.spect
     
     if spect is None:
@@ -745,7 +750,7 @@ def color_jitter(
         spect = PIL.Image.merge('HSV', (h, s, v)).convert('RGB')
     
     spectrogram.spect = spect
-    
+     
     return spectrogram, options
 
 ####################################################

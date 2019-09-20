@@ -42,6 +42,11 @@ class Audio():
     '''
     
     global audio_manipulations
+    
+    __slots__ = ['original_path', 'samples', 'sample_rate', 
+                 'possible_manipulations', 'manipulations',
+                 'sources', 'labels'
+                ]
         
     def __repr__(self):
         sources = [source[0] for source in self.sources]

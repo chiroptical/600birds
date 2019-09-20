@@ -325,9 +325,8 @@ def test_spectrogram_manipulation_adds_manipulation(
             _test_adds_manip(mel = True, img = True)
             _test_adds_manip(mel = False, img = True)
             
-            
 ####################################################
-####################################################
+###### Meta-tests: tests of spect manip tests ######
 ####################################################
 
 def test_spect_manipulation_test_catches_no_spectrogram_arg():
@@ -378,7 +377,7 @@ def test_spectrogram_test_passes_good_manipulation_addition(spect_ex):
         
         return spectrogram
     test_spectrogram_manipulation_adds_manipulation(function_that_works, spect_ex)
-    
+
 def test_remove_bands_first_hi_and_last_two():
     # Remove the first band and the last two
     

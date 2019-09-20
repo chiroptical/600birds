@@ -1,5 +1,6 @@
 # Image module imports
 import librosa
+import librosa.display
 import numpy as np
 import skimage.transform
 import PIL
@@ -10,6 +11,7 @@ from ..code.audio_aug import Audio
 import os
 import random
 from functools import wraps
+import matplotlib.pyplot as plt
 
 spectrogram_manipulations = []
 
@@ -186,6 +188,52 @@ class Spectrogram():
         
         return True
 
+    def make_plot(self, convert_db = True):
+        '''
+        Returns plotted self.spect
+        
+        Inputs:
+            convert_db: whether to use 
+                librosa.power_to_db to convert
+                spectrogram to decibels
+        
+        Returns:
+            plt: matplotlib plt
+        '''
+        if isinstance(self.spect, np.ndarray):
+            spect = self.spect
+            cmap = 'gray_r'
+        elif isinstance(self.spect,  PIL.Image.Image):
+            # Convert image:
+            #  grayscale img --> np array --> flip np array
+            # These operations are done in reverse when converting
+            # original np.ndarray to image; need to undo them to make 
+            # librosa.display.specshow comparable between array and img
+            spect = np.array(self.spect.convert('L'))[::-1, ...]
+            cmap = 'gray'
+        else:
+            raise NotImplementedError('spect type not recognized')
+
+        if self.mel:
+            y_axis = 'mel'
+        else:
+            y_axis = 'linear'
+        
+        if convert_db:
+            spect = librosa.power_to_db(spect, ref=np.max)
+        
+        plt.figure()
+        plt.subplot(1, 1, 1)
+        librosa.display.specshow(
+            spect,
+            sr = self.sample_rate,
+            x_axis = 'time',
+            y_axis = y_axis,
+            cmap = cmap)
+        return plt
+            
+        
+        
 
 ####################################################
 ##### Wrapper for spectrogram manipulation fns #####
@@ -573,7 +621,11 @@ def resize_spect_random_interpolation(
     
     if spectrogram.spect is None:
         raise SpectrogramNotComputedError('spectrogram.spect is not computed yet.'
-                                         ' Use make_mel_spectrogram or make_linear_spectrogram')
+                                         ' Use make_mel_spectrogram or'
+                                         ' make_linear_spectrogram')
+    
+    if isinstance(spectrogram.spect, PIL.Image.Image):
+        raise ValueError('spectrogram.spect already converted to image.')
     
     spect = spectrogram.spect
 
@@ -585,10 +637,12 @@ def resize_spect_random_interpolation(
     if not isinstance(width, int) and isinstance(height, int):
         raise ValueError('Height and width must be given in integers')
     
-
-    # Convert spectrogram to image:
-    spect = spect[::-1, ...] # Flip array
-    spect_image = PIL.Image.fromarray(spect.astype(np.uint8))
+    # Make spectrogram pleasing to human eye (flip vertically, convert to db)
+    spect = librosa.power_to_db(spect[::-1, ...]) 
+    
+    # Convert spectrogram to image
+    spect = spect.astype(np.uint8) # Convert to needed type
+    spect_image = PIL.Image.fromarray(spect)
     spect_image = PIL.ImageOps.invert(spect_image) # Invert colors
 
     # Randomly choose interpolation

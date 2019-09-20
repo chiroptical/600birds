@@ -385,16 +385,23 @@ def get_chunk(
     
     # Get chunks with skip in the middle with probability = chance_random_skip
     if random.random() < chance_random_skip:
-        position_to_skip = random.randint(0, samples_to_extract)
-        amount_to_skip = random.randint(0, samples_to_extract)
-
-        chunk_1_start = start_position
-        chunk_1_end = chunk_1_start + position_to_skip
-        chunk_2_start = chunk_1_end + amount_to_skip
-        chunk_2_end = chunk_1_start + (samples_to_extract - position_to_skip)
+        len_before_skip = random.randint(0, samples_to_extract)
+        len_of_skip = random.randint(0, samples_to_extract)
         
-        chunk_1 = _wraparound_extract(audio.samples, chunk_1_start, chunk_1_end)
-        chunk_2 = _wraparound_extract(audio.samples, chunk_2_start, chunk_2_end)
+        chunk_1_start = start_position
+        chunk_1_len = len_before_skip
+        chunk_2_start = chunk_1_start + chunk_1_len + len_of_skip
+        chunk_2_len = samples_to_extract - len_before_skip
+        
+        chunk_1 = _wraparound_extract(
+            audio.samples,
+            begin = chunk_1_start,
+            length = chunk_1_len)
+        chunk_2 = _wraparound_extract(
+            audio.samples,
+            begin = chunk_2_start,
+            length = chunk_2_len)
+        
         chunk = np.concatenate((chunk_1, chunk_2))
     
     # Otherwise get contiguous chunk

@@ -233,6 +233,27 @@ def test_wraparound_extract():
     npt.assert_array_equal(_wraparound_extract(original = np.array([0, 1]), begin = 5, length = 3), np.array([1, 0, 1]))
 
 
+# Get chunk
+
+def test_get_chunk_skips_correctly(audio_ex):
+    # Implemented due to get_chunk returning huge lengths
+    # of data whenever it randomly skipped
+    
+    # Without skipping, desired and actual are equal to 3 decimals
+    audio = audio_ex('1min.wav')
+    chunked_audio = get_chunk(audio, chance_random_skip = 0) # force no skip
+    desired_seconds_long = chunked_audio.sources[0][1][1]
+    actual_seconds_long = chunked_audio.samples.shape[0]/chunked_audio.sample_rate
+    npt.assert_almost_equal(desired_seconds_long, actual_seconds_long, decimal = 3)
+    
+    
+    # With skipping, desired and actual should be equal to 3 decimals
+    audio = audio_ex('1min.wav')
+    chunked_audio = get_chunk(audio, chance_random_skip = 1) # force skip
+    desired_seconds_long = chunked_audio.sources[0][1][1]
+    actual_seconds_long = chunked_audio.samples.shape[0]/chunked_audio.sample_rate
+    npt.assert_almost_equal(desired_seconds_long, actual_seconds_long, decimal = 3)
+
 
 # Cyclic shift
 

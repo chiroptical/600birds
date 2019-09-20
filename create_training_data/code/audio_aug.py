@@ -3,9 +3,7 @@ import librosa
 import os
 import numpy as np
 import random
-from functools import wraps
 import math
-from scipy.signal import butter, lfilter
 
 audio_manipulations = []
 
@@ -216,7 +214,7 @@ class Audio():
 ######## Wrapper for manipulation functions ########
 ####################################################
 
-def audio_manipulation(func):
+def _audio_manipulation(func):
     '''
     Functionality for audio manipulation functions
     
@@ -243,6 +241,7 @@ def audio_manipulation(func):
       - wrapped version of the function that returns only 
         the Audio object.
     '''
+    from functools import wraps
     
     global audio_manipulations
     audio_manipulations.append(func.__name__)
@@ -322,7 +321,7 @@ def _wraparound_extract(original, begin, length):
     #print(desired_list)
     return desired_list
 
-@audio_manipulation
+@_audio_manipulation
 def get_chunk(
     audio,
     start_position = None, # randomize start position
@@ -459,7 +458,7 @@ def _shift_array(array, split_point = None):
     return np.concatenate((array[split_point:], array[:split_point]))
 
 
-@audio_manipulation
+@_audio_manipulation
 def cyclic_shift(audio, split_point = None):
     '''
     Shift audio samples by a random amount
@@ -542,7 +541,7 @@ def _combine_samples(divided):
     
     return np.concatenate(divided)
 
-@audio_manipulation
+@_audio_manipulation
 def time_stretch_divisions(
     audio,
     low_division_duration = 0.5,
@@ -603,7 +602,7 @@ def time_stretch_divisions(
     
     return audio, options
 
-@audio_manipulation
+@_audio_manipulation
 def pitch_shift_divisions(
     audio,
     low_division_duration = 0.5,
@@ -673,7 +672,7 @@ def pitch_shift_divisions(
 ####################################################
 ################ Random audio filtering ############
 
-@audio_manipulation
+@_audio_manipulation
 def random_filter(
     audio,
     percent_chance = 0.20,
@@ -704,6 +703,8 @@ def random_filter(
     
     options = locals()
     del options['audio']
+    
+    from scipy.signal import butter, lfilter
     
     samples = audio.samples
     sample_rate = audio.sample_rate
@@ -894,7 +895,7 @@ def _select_chunk(
     )
 
 
-@audio_manipulation
+@_audio_manipulation
 def sum_chunks(
     audio,
     label_dict = None,

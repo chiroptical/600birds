@@ -7,7 +7,7 @@ import inspect
 from ..code.audio_aug import *
 
 # Private helper functions
-from ..code.audio_aug import (
+from ..code.audio_aug import (_audio_manipulation,
     _wraparound_extract, _shift_array, _divide_samples,
     _combine_samples, _fade, _sum_samples, _select_chunk
 )
@@ -104,13 +104,13 @@ def test_Audio_add_source_actually_works_tuple(audio_ex):
 
 def test_audio_wrapper_arg_checking():
     # Raise error if kwarg is not "audio" type
-    @audio_manipulation
+    @_audio_manipulation
     def function_with_good_kwarg(audio = None):
         return None
     with pytest.raises(ValueError):
         function_with_good_kwarg(audio = 'nope')
 
-    @audio_manipulation 
+    @_audio_manipulation 
     def function_with_bad_kwarg(notaudio = None):
         return None
     with pytest.raises(ValueError):

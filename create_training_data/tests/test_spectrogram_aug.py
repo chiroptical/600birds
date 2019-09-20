@@ -275,9 +275,8 @@ def test_spectrogram_manipulation_adds_manipulation(
     '''
     '''
 
-    print(type(spect_ex))
     spect = spect_ex()
-    print(type(spect))
+
     def _test_adds_manip(mel = None, img = False):
         '''
         Test a spectrogram returned from the func of interest
@@ -309,9 +308,13 @@ def test_spectrogram_manipulation_adds_manipulation(
         for key in sig_dict:
             sig_dict[key] = sig_dict[key].default
         sig_dict.pop('spectrogram')
-
+        default_addition = (function.__name__, sig_dict)
+        
         # Ensure function added the correct entry to the manipulation list
-        assert manip == (function.__name__, sig_dict)
+        if manip != default_addition:
+            raise AssertionError(f'function {function.__name__} adds bad manipulation.\n'
+                                f'Bad manipulation: \n{manip}\n'
+                                f'Should have been: \n{default_addition}')
     
     try:
         _test_adds_manip(mel = None, img = False)

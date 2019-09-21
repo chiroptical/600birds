@@ -10,7 +10,6 @@ from scipy import signal
 from ..code.audio_aug import Audio
 import os
 import random
-from functools import wraps
 import matplotlib.pyplot as plt
 
 spectrogram_manipulations = []
@@ -271,6 +270,8 @@ def spectrogram_manipulation(func):
       - wrapped version of the function that returns only 
         the Spectrogram object.
     '''
+    
+    from functools import wraps
     
     global spectrogram_manipulations
     spectrogram_manipulations.append(func.__name__)

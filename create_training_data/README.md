@@ -2,7 +2,29 @@
 
 Create training data (spectrograms containing ~5s of labeled audio). For an example pipeline loading these modules and using them to augment data, see [`notebooks/example_augmentation.ipynb`](https://github.com/rhine3/600birds/blob/master/create_training_data/notebooks/example_augmentation.ipynb).
 
+## About these modules
+
+In machine learning, *augmentation* refers to creating or modifying data to supplement prexisting training data. Augmentation "messes up" the given training data to increase the size of the dataset, as well as to give more breadth in the hope of making the machine learning more robust. 
+
+To augment data for machine learning on spectrograms, we perform "manipulations" on audio samples or spectrogram images. This example augmentation workflow uses code from two modules, `code/audio_aug.py` and `code/spectrogram_aug.py`. The modules are parallel: both define a class, `Audio` or `Spectrogram`. The class attributes include, among other things, a list of which manipulation functions have been called on the object. 
+
+All public manipulation functions have a similar structure. They are each called with one required argument (which should be either an `Audio` or a `Spectrogram` object) and several optional keyword arguments. The public functions are wrapped with a wrapper which performs input validation and updates some aspects of the modules.  Some functions in the module start with an underscore, including the wrapper. These are helper functions that are meant to be used only within the module itself; they may or may not operate on instances of the class.
+
+## Background
+
+These augmentation procedures are based on [data augmentation procedures](http://ceur-ws.org/Vol-2380/paper_86.pdf) developed by Mario Lasseck.
+
+The 2018 challenge took a very different approach to the "audio chunk summation" part of the audio augmentation.  This approach was not used in the 2019 challenge because of the availability of annotated noise/background data. The augmentations included:
+* Different sources of summed audio chunks: instead of using annotated noise/background segments from validation files, use image processing to roughly segment training files into "background" and "foreground"
+   * Form "BirdsOnly" dataset by concatenating all bird sounds
+   * Form "NoiseOnly" dataset by concatenating all background sounds
+   * From "BackgroundOnly" dataset by concatenating all longer sequences of background sounds 
+* Reconstruct audio signal by summing up the segmented elements described above
+
+
+
 ## Audio augmentations
+All functions operate on instances of `Audio` and include optional keyword arguments.
 
 * `get_chunk()`: Extract chunk of audio at random position in file
      * Wrap around to beginning of file if necessary
@@ -34,6 +56,7 @@ Create training data (spectrograms containing ~5s of labeled audio). For an exam
     
    
 ## Image augmentations
+All functions operate on instances of `Spectrogram` and include optional keyword arguments.
 
 * Spectrogram creation functions, `make_linear_spectrogram()` or `make_mel_spectrogram()`:
 
@@ -57,12 +80,3 @@ Create training data (spectrograms containing ~5s of labeled audio). For an exam
 * [X] `resize_spect_random_interpolation()`: Different interpolation filters for spectrogram resizing: 85% chance of using Lanczos filter; 15% chance of using a different resampling filter from the python imaging library (Nearest, Box, Bilinear, Hamming, Bicubic)
 
 * [X] `color_jitter()`: Color jitter (brightness, contrast, saturation: factor 0.3; hue: factor 0.01)
-
-These augmentation procedures are based on [data augmentation procedures](http://ceur-ws.org/Vol-2380/paper_86.pdf) developed by Mario Lasseck.
-
-The 2018 challenge took a very different approach to the "audio chunk summation" part of the audio augmentation.  This approach was not used in the 2019 challenge because of the availability of annotated noise/background data. The augmentations included:
-* Different sources of summed audio chunks: instead of using annotated noise/background segments from validation files, use image processing to roughly segment training files into "background" and "foreground"
-   * Form "BirdsOnly" dataset by concatenating all bird sounds
-   * Form "NoiseOnly" dataset by concatenating all background sounds
-   * From "BackgroundOnly" dataset by concatenating all longer sequences of background sounds 
-* Reconstruct audio signal by summing up the segmented elements described above

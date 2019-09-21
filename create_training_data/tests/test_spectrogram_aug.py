@@ -7,7 +7,9 @@ from ..code.audio_aug import Audio
 from ..code.spectrogram_aug import *
 
 # Helper functions
-from ..code.spectrogram_aug import _remove_bands, _resize_bands
+from ..code.spectrogram_aug import (
+    _spectrogram_manipulation,
+    _remove_bands, _resize_bands)
 
 ####################################################
 #################### Helpers ######################
@@ -217,13 +219,13 @@ def test_Spectrogram_add_source_works_correctly_tuple(spect_ex):
 ####################################################
     
 def test_spectrogram_wrapper_spectrogram_arg_is_required():
-    @spectrogram_manipulation
+    @_spectrogram_manipulation
     def function_with_good_kwarg(spectrogram = None):
         return None
     with pytest.raises(ValueError):
         function_with_good_kwarg(spectrogram = 'hah')
 
-    @spectrogram_manipulation
+    @_spectrogram_manipulation
     def function_with_bad_kwarg(notspectrogram = None):
         return None
     with pytest.raises(ValueError):

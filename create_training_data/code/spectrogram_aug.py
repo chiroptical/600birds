@@ -243,7 +243,7 @@ class Spectrogram():
 ##### Wrapper for spectrogram manipulation fns #####
 ####################################################
 
-def spectrogram_manipulation(func):
+def _spectrogram_manipulation(func):
     '''
     Functionality for spectrogram manipulation functions
     
@@ -311,7 +311,7 @@ class SpectrogramNotComputedError(BaseException):
 ####################################################
 # Functions for computing spectrograms
 
-@spectrogram_manipulation
+@_spectrogram_manipulation
 def make_mel_spectrogram(
     spectrogram,
     fmax = None,
@@ -375,7 +375,7 @@ def make_mel_spectrogram(
     return spectrogram, options
 
 
-@spectrogram_manipulation
+@_spectrogram_manipulation
 def make_linear_spectrogram(
     spectrogram,
     window = "hann",
@@ -431,7 +431,7 @@ def _remove_bands(array, min_lo, max_lo, min_hi, max_hi):
         return array[lo_remove:-hi_remove]
 
     
-@spectrogram_manipulation
+@_spectrogram_manipulation
 def remove_random_hi_lo_bands(
     spectrogram,
     min_lo = 0,
@@ -533,7 +533,7 @@ def _resize_bands(
 
 
 
-@spectrogram_manipulation
+@_spectrogram_manipulation
 def resize_random_bands(
     spectrogram,
     rows_or_cols = 'rows',
@@ -594,7 +594,7 @@ def resize_random_bands(
 class ImageNotComputedError(Exception):
     pass
 
-@spectrogram_manipulation
+@_spectrogram_manipulation
 def resize_spect_random_interpolation(
     spectrogram,
     width = None,
@@ -672,7 +672,7 @@ def resize_spect_random_interpolation(
 ####################################################
 # Jitter brightness, contrast, saturation
 
-@spectrogram_manipulation
+@_spectrogram_manipulation
 def color_jitter(
     spectrogram,
     brightness = 0.3,

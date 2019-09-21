@@ -192,11 +192,27 @@ class Spectrogram():
         
         return True
 
-    def make_plot(self, convert_db = True):
+    def plot_axes(self, ax, convert_db = True):
         '''
-        Returns plotted self.spect
+        Plots self.spect on provided axes
+        
+        Example:
+        
+            # Create a 2x2 figure
+            import matplotlib.pyplot as plt
+            
+            fig, ax = plt.subplots(2, 2)
+            axes = ax.flatten()
+
+            for idx, spect in enumerate(spectrogram_list):
+                spect_ax = spect.plot_axes(ax = axes[idx])
+            
+            plt.show()
+
         
         Inputs:
+            ax (matplotlib.axes.__subplots.AxesSubplot):
+                axis on which to plot 
             convert_db: whether to use 
                 librosa.power_to_db to convert
                 spectrogram to decibels
@@ -226,15 +242,30 @@ class Spectrogram():
         if convert_db:
             spect = librosa.power_to_db(spect, ref=np.max)
         
-        plt.figure()
-        plt.subplot(1, 1, 1)
-        librosa.display.specshow(
-            spect,
-            sr = self.sample_rate,
-            x_axis = 'time',
-            y_axis = y_axis,
-            cmap = cmap)
-        return plt
+        if ax:
+            
+            ax = librosa.display.specshow(
+                spect,
+                ax = ax,
+                sr = self.sample_rate,
+                x_axis = 'time',
+                y_axis = y_axis,
+                cmap = cmap)
+            
+            return ax
+            
+        else:
+            
+            plt.figure()
+            plt.subplot(1, 1, 1)
+            ax = librosa.display.specshow(
+                spect,
+                sr = self.sample_rate,
+                x_axis = 'time',
+                y_axis = y_axis,
+                cmap = cmap)
+        
+            return ax
             
         
         

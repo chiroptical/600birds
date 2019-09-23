@@ -318,7 +318,6 @@ def _wraparound_extract(original, begin, length):
     else:
         desired_list = original[begin:begin+length]
     
-    #print(desired_list)
     return desired_list
 
 @_audio_manipulation
@@ -903,7 +902,8 @@ def sum_chunks(
     start_position = None,
     duration = 6, 
     duration_jitter = 0,
-    chance_random_skip = 0.3
+    chance_random_skip = 0.3,
+    seed = None
 ):
     '''
     Add a random chunk to audio
@@ -963,6 +963,8 @@ def sum_chunks(
     options = locals()
     del options['audio']
     
+    random.seed(seed)
+    
     if not label_dict:
         label_dict = {'test': os.path.join(os.path.dirname(os.path.dirname(__file__)), 'tests/')}
     
@@ -984,10 +986,11 @@ def sum_chunks(
                 chunks_to_add += 1
                 if random.random() < 0.2:
                     chunks_to_add += 1
-    
+
+
+    audio_max = np.max(audio.samples)
     # Iteratively combine chunks and labels
     for idx in range(chunks_to_add):
-        
         # Select a new label if necessary
         label = new_chunk_labels[idx]
         if label == 'random':
@@ -1013,8 +1016,15 @@ def sum_chunks(
             chance_random_skip = chance_random_skip
         )
         
-        # Randomly change amplitude of chunk
-        amp_modifier = random.randrange(0, 1) # TODO: not sure if this has the intended effect
+        # Randomly change amplitude of chunk; can only be 2x amplitude of audio.samples
+
+        # How many times softer or louder the current audio is than new chunk
+        loudness_ratio = audio_max / np.max(new_chunk.samples)
+        # How much softer or louder louder the new audio should be
+        amplifier = random.uniform(0.5, 1.1)
+        # Find amplifier with respect to loudness ratio
+        amp_modifier = loudness_ratio * amplifier
+
         new_chunk.set_samples(np.multiply(new_chunk.samples, amp_modifier))
         
         # Add chunks together

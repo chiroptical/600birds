@@ -21,38 +21,43 @@ spectrogram_manipulations = []
 class Spectrogram():
     
     __slots__ = ["audio", "sample_rate", "samples", "labels", 
-                 "mel", "spect_settings", "spect", "times", "freqs",
-                "possible_manipulations", "manipulations", "sources"]
+                 "mel", "spect", "times", "freqs",
+                "possible_manipulations", "manipulations", "sources",
+                "save_path"]
     
-    def __init__(self, audio = None, mel = False, spect_settings = 'default'):
+    def __init__(self, audio = None, mel = False):
         '''
         Set up a Spectrogram object but do not create spectrogram
         '''
-        global spectrogram_manipulations
 
         # From audio object, filled by class method _set_audio
         self.audio = None
         self.sample_rate = None
         self.samples = None
         self.labels = None
-        
-        # From other arguments, filled by class method _set_settings
+                
+        # Filled by set_spect_attrs
         self.mel = None
-        self.spect_settings = {}
-        
-        # Filled by _make_spectrogram
         self.spect = None
         self.times = None
         self.freqs = None
-        self.possible_manipulations = spectrogram_manipulations
+        
+        # Filled by set_possible_manipulations
+        self.possible_manipulations = None
         
         # Filled by class methods
         self.manipulations = []
         self.sources = []
+        
+        # Filled when spect is saved
+        self.save_path = None
     
         # Set self.audio, self.samples, self.sample_rate, self.labels
         self._set_audio(audio)
  
+        # Set self.possible_manipulations
+        global spectrogram_manipulations
+        self.set_possible_manipulations(manip_list = spectrogram_manipulations)
 
     def __repr__(self):
         sources = [source[0] for source in self.audio.sources]
@@ -218,7 +223,7 @@ class Spectrogram():
                 spectrogram to decibels
         
         Returns:
-            plt: matplotlib plt
+            ax: matplotlib ax
         '''
         if isinstance(self.spect, np.ndarray):
             spect = self.spect
@@ -266,6 +271,21 @@ class Spectrogram():
                 cmap = cmap)
         
             return ax
+        
+        
+    def save_image(self, path):
+        '''
+        Save image to file
+        '''
+        if not path.endswith(('.png', '.jpg')):
+            raise ValueError('Path to save to must be to .png or .jpg')
+            
+        directory = os.path.dirname(path)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        
+        self.save_path = path
+        return self.spect.save(path)
             
         
         

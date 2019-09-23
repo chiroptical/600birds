@@ -79,7 +79,9 @@ class InstList(Sequence):
     
     def __len__(self):
         return len(self.instances)
-        
+    
+    def __repr__(self):
+        return str(self.instances)
     
     def apply_func(self, func, **kwargs):
         '''

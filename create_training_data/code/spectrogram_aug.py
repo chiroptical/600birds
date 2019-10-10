@@ -333,19 +333,14 @@ def _spectrogram_manipulation(func):
             raise ValueError('spectrogram must not be given as a keyword argument')
         else:
             spect_arg = args[0]
-            
-        # TODO: remove ability for spect to be a kwarg.
-        ''' try:
-            spect_arg = kwargs['spectrogram']
-        except KeyError:
-            try:
-                spect_arg = args[0]
-            except IndexError:
-                raise ValueError(f"no first argument given. If spectrogram kwarg is not used, a Spectrogram object must be provided as first argument.")
-        '''
         
         if not isinstance(spect_arg, Spectrogram):
             raise ValueError(f"a Spectrogram object must be provided as argument spectrogram. Got {type(spect_arg)}")
+        
+        if len(args) > 1:
+            raise ValueError('only one argument, spectrogram, can be positional.'
+                            'Others must be called as keyword arguments.'
+                            f'Got {len(args)} positional arguments.')
         
         # Run manipulation
         manipulated_spect = func(*args, **kwargs)

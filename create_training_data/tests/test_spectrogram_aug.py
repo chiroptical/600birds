@@ -233,6 +233,13 @@ def test_spectrogram_wrapper_spectrogram_arg_cannot_be_kwarg(spect_ex):
     with pytest.raises(ValueError):
         function_with_spectrogram_kwarg(spectrogram = spect_ex)
         
+def test_spectrogram_wrapper_spectrogram_arg_rejects_multiple_positional_args(spect_ex):
+    @_spectrogram_manipulation
+    def function_with_multiple_positional_args(spectrogram, another_positional):
+        return spect_ex
+    with pytest.raises(ValueError):
+        function_with_multiple_positional_args(spect_ex(), 'another_positional_value')
+        
 ####################################################
 ######### Tests for all manipulation funcs #########
 ####################################################
@@ -275,9 +282,6 @@ def test_spectrogram_manipulation_adds_manipulation(
     function, 
     spect_ex
 ):
-    '''
-    '''
-
     spect = spect_ex()
 
     def _test_adds_manip(mel = None, img = False):

@@ -83,76 +83,7 @@ def spect_ex():
 
     return _select_options
 
-'''
 
-@pytest.fixture
-def spect_mel_ex():
-    '#''
-    Return Spectrogram object for file in
-    current directory, with mel spectrogram
-    already computed
-    '#''
-    
-    path = 'veryshort.wav'
-    abs_path = os.path.join(TEST_PATH, path)
-    audio = Audio(path = abs_path, label='test')
-    spectrogram = Spectrogram(audio = audio)
-    return make_mel_spectrogram(spectrogram)
-
-
-@pytest.fixture
-def spect_lin_ex():
-    '#''
-    Return Spectrogram object for file in
-    current directory, with linear spectrogram
-    already computed
-    ''#'
-    
-    path = 'veryshort.wav'
-    abs_path = os.path.join(TEST_PATH, path)
-    audio = Audio(path = abs_path, label='test')
-    spectrogram = Spectrogram(audio = audio)
-    return make_linear_spectrogram(spectrogram)
-
-
-
-@pytest.fixture
-def spect_mel_img_ex():
-    ''#'
-    Return Spectrogram object for file in
-    current directory, with mel spectrogram
-    already computed and converted to image
-    '#''
-    
-    path = 'veryshort.wav'
-    abs_path = os.path.join(TEST_PATH, path)
-    audio = Audio(path = abs_path, label='test')
-    spectrogram = Spectrogram(audio = audio)
-    spectrogram = make_mel_spectrogram(spectrogram)
-    return resize_spect_random_interpolation(spectrogram)
-
-    
-@pytest.fixture
-def spect_lin_img_ex():
-    '#''
-    Return Spectrogram object for file in
-    current directory, with linear spectrogram
-    already computed and converted to image
-    ''#'
-    
-    path = 'veryshort.wav'
-    abs_path = os.path.join(TEST_PATH, path)
-    audio = Audio(path = abs_path, label='test')
-    spectrogram = Spectrogram(audio = audio)
-    spectrogram = make_linear_spectrogram(spectrogram)
-    return resize_spect_random_interpolation(spectrogram)
-
-@pytest.fixture
-def all_fixtures():
-    return [audio_ex,
-    spect_ex, 
-    spect_mel_ex, spect_lin_ex,
-    spect_mel_img_ex, spect_lin_img_ex,]'''
 ####################################################
 ########### Tests for Spectrogram class ############
 ####################################################

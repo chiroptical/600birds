@@ -1,5 +1,6 @@
 # Image module imports
 import librosa
+import inspect
 import librosa.display
 import numpy as np
 import skimage.transform
@@ -312,10 +313,9 @@ def _spectrogram_manipulation(func):
     
     Inputs:
       - func (function): a function with all arguments
-        provided as kwargs, except one argument called `spectrogram`.
-        Function must return an Spectrogram object and a list of
-        keyword arguments that does not include the  
-        reference to the manipulated Spectrogram object
+        provided as kwargs, except one positional argument 
+        called `spectrogram`. This function must return 
+        a Spectrogram object.
     
     Returns:
       - wrapped version of the function that returns only 
@@ -329,22 +329,37 @@ def _spectrogram_manipulation(func):
     
     @wraps(func) #Allows us to call help(func)
     def validate_spectrogram(*args, **kwargs):
-        try:
+        if 'spectrogram' in kwargs.keys():
+            raise ValueError('spectrogram must not be given as a keyword argument')
+        else:
+            spect_arg = args[0]
+            
+        # TODO: remove ability for spect to be a kwarg.
+        ''' try:
             spect_arg = kwargs['spectrogram']
         except KeyError:
             try:
                 spect_arg = args[0]
             except IndexError:
                 raise ValueError(f"no first argument given. If spectrogram kwarg is not used, a Spectrogram object must be provided as first argument.")
-            
+        '''
+        
         if not isinstance(spect_arg, Spectrogram):
-            raise ValueError(f"a Spectrogram object must be provided as keyword argument spectrogram. Got {type(spect_arg)}")
-            
+            raise ValueError(f"a Spectrogram object must be provided as argument spectrogram. Got {type(spect_arg)}")
+        
         # Run manipulation
-        manipulated_spect, arguments = func(*args, **kwargs)
+        manipulated_spect = func(*args, **kwargs)
+        
+        # Create a dictionary of kwargs function was called with,
+        # including default kwargs if the default was used
+        param_dict = kwargs
+        for param in inspect.signature(func).parameters.values():
+            if param.name not in param_dict.keys():
+                if param.default is not param.empty:
+                    param_dict[param.name] = param.default
         
         # Add manipulation to list of manipulations
-        manipulated_spect.add_manipulation(func.__name__, arguments)
+        manipulated_spect.add_manipulation(func.__name__, param_dict)
         
         return manipulated_spect
     
@@ -394,8 +409,6 @@ def make_mel_spectrogram(
     Returns:
         decibel-formatted spectrogram in the form of an np.array
     '''
-    options = locals()
-    del options['spectrogram']
     
     y = spectrogram.samples
     sr = spectrogram.sample_rate
@@ -417,13 +430,16 @@ def make_mel_spectrogram(
         n_mels = n_mels
     )
 
+    # Convert to decibel units and flip vertically
+    spect = librosa.power_to_db(spect[::-1, ...]) 
+    
     spectrogram.set_spect_attrs(
         mel = True,
         spect = spect,
         freqs = None,
         times = None)
 
-    return spectrogram, options
+    return spectrogram
 
 
 @_spectrogram_manipulation
@@ -435,8 +451,6 @@ def make_linear_spectrogram(
     nfft = 512,
     scaling = "spectrum"
 ):
-    options = locals()
-    del options['spectrogram']
     
     freqs, times, spect = signal.spectrogram(
         spectrogram.samples,
@@ -454,7 +468,7 @@ def make_linear_spectrogram(
         freqs = freqs,
         times = times)
     
-    return spectrogram, options
+    return spectrogram
 
 ####################################################
 # Removing high/low spectrogram rows
@@ -493,16 +507,20 @@ def remove_random_hi_lo_bands(
     '''
     Remove random bands at top and bottom of spectrogram
     '''
-    options = locals()
-    del options['spectrogram']
     
     if not isinstance(spectrogram.spect, np.ndarray):
         raise SpectrogramNotComputedError('spectrogram.spect has not been computed.'
                         ' Use make_mel_spectrogram or make_linear_spectrogram')
     
-    spectrogram.spect = _remove_bands(spectrogram.spect, **options)
+    spectrogram.spect = _remove_bands(
+        spectrogram.spect,
+        min_lo = min_lo,
+        max_lo = max_lo,
+        min_hi = min_hi,
+        max_hi = max_hi
+    )
     
-    return spectrogram, options
+    return spectrogram
 
 ####################################################
 # Resize random columns/rows
@@ -627,16 +645,22 @@ def resize_random_bands(
             (with probability = chance_resize) or the 
             original spectrogram (prob = 1 - chance_resize)
     '''
-    options = locals()
-    del options['spectrogram']
     
     if spectrogram.spect is None:
         raise SpectrogramNotComputedError('spectrogram.spect is not computed yet.'
                                          ' Use make_mel_spectrogram or make_linear_spectrogram')
     
     
-    spectrogram.spect = _resize_bands(array = spectrogram.spect, **options)
-    return spectrogram, options
+    spectrogram.spect = _resize_bands(
+        array = spectrogram.spect,
+        rows_or_cols = rows_or_cols,
+        chance_resize = chance_resize,
+        min_division_size = min_division_size,
+        max_division_size = max_division_size,
+        min_stretch_factor = min_stretch_factor,
+        max_stretch_factor = max_stretch_factor
+    )
+    return spectrogram
 
 
 ####################################################
@@ -672,9 +696,8 @@ def resize_spect_random_interpolation(
     Returns:
         a resized PIL image, in RGB
     '''
-    options = locals()
-    del options['spectrogram']
     
+    from sklearn.preprocessing import MinMaxScaler
     if spectrogram.spect is None:
         raise SpectrogramNotComputedError('spectrogram.spect is not computed yet.'
                                          ' Use make_mel_spectrogram or'
@@ -693,14 +716,33 @@ def resize_spect_random_interpolation(
     if not isinstance(width, int) and isinstance(height, int):
         raise ValueError('Height and width must be given in integers')
     
-    # Make spectrogram pleasing to human eye (flip vertically, convert to db)
-    spect = librosa.power_to_db(spect[::-1, ...]) 
     
+    def _min_max_scale(spect, feature_range=(0, 1)):
+        bottom, top = feature_range
+        spect_min = spect.min()
+        spect_max = spect.max()
+        scale_factor = (top - bottom) / (spect_max - spect_min)
+        return scale_factor * (spect - spect_min) + bottom
+    
+    # Convert to decibel units and flip vertically
+    spect = librosa.power_to_db(spect[::-1, ...]) 
+
+    # Apply gain and range as in Audacity defaults
+    spect_gain = 20
+    spect_range = 80
+    spect[spect > -spect_gain] = -spect_gain
+    spect[spect < -(spect_gain + spect_range)] = -(spect_gain + spect_range)
+   
+    # Scale to 0-255 and invert colors
+    spect = 255 - _min_max_scale(
+        spect = spect,
+        feature_range=(0, 200) # (0,255) is entire gray range; 
+                               # use a more limited range
+    )
     
     # Convert spectrogram to image
     spect = spect.astype(np.uint8) # Convert to needed type
     spect_image = PIL.Image.fromarray(spect)
-    spect_image = PIL.ImageOps.invert(spect_image) # Invert colors
     
     # Randomly choose interpolation
     if random.random() > chance_random_interpolation:
@@ -718,7 +760,7 @@ def resize_spect_random_interpolation(
     rgb = resized.convert('RGB')
     spectrogram.spect = rgb
     
-    return spectrogram, options
+    return spectrogram
 
 ####################################################
 # Jitter brightness, contrast, saturation
@@ -758,8 +800,6 @@ def color_jitter(
         hue (float, 0 <= hue <= 0.5): how much to jitter hue.
             Jitter amount is chosen uniformly from [-hue, hue].
     '''
-    options = locals()
-    del options['spectrogram']
 
     spect = spectrogram.spect
     
@@ -803,7 +843,7 @@ def color_jitter(
     
     spectrogram.spect = spect
      
-    return spectrogram, options
+    return spectrogram
 
 ####################################################
 

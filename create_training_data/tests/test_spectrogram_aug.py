@@ -1,3 +1,4 @@
+# TODO: remove ability for spectrogram to be an arg
 # Testing imports
 import os
 import pytest
@@ -218,19 +219,19 @@ def test_Spectrogram_add_source_works_correctly_tuple(spect_ex):
 ######## Tests of spectrogram manip wrapper ########
 ####################################################
     
-def test_spectrogram_wrapper_spectrogram_arg_is_required():
+def test_spectrogram_wrapper_accepts_spectrogram_arg(spect_ex):
     @_spectrogram_manipulation
-    def function_with_good_kwarg(spectrogram = None):
-        return None
-    with pytest.raises(ValueError):
-        function_with_good_kwarg(spectrogram = 'hah')
-
+    def function_with_spectrogram_arg(spectrogram):
+        return spectrogram
+    
+    function_with_spectrogram_arg(spect_ex())
+    
+def test_spectrogram_wrapper_spectrogram_arg_cannot_be_kwarg(spect_ex):
     @_spectrogram_manipulation
-    def function_with_bad_kwarg(notspectrogram = None):
-        return None
+    def function_with_spectrogram_kwarg(spectrogram = None, spect_ex = spect_ex):
+        return spect_ex
     with pytest.raises(ValueError):
-        function_with_bad_kwarg(notspectrogram = 'not')
-
+        function_with_spectrogram_kwarg(spectrogram = spect_ex)
         
 ####################################################
 ######### Tests for all manipulation funcs #########
@@ -250,7 +251,7 @@ def test_spectrogram_manipulation_returns_Spectrogram(
     
     def _test_returns(mel, img):
         spect = spect_ex(mel = mel, img = img)
-        spect = function(spectrogram = spect)
+        spect = function(spect)
         assert isinstance(spect, Spectrogram)
     
     try:
@@ -343,13 +344,13 @@ def test_spect_manipulation_test_catches_no_spectrogram_arg():
         
 def test_spect_manipulation_test_catches_wrong_return_format(spect_ex):
     # Manipulation does not return correct type
-    def function_returning_wrong_type(spectrogram = None):
+    def function_returning_wrong_type(spectrogram):
         return True
     with pytest.raises(AssertionError):
         test_spectrogram_manipulation_returns_Spectrogram(
             function_returning_wrong_type, spect_ex)
     
-    def function_with_two_returns(spectrogram = None):
+    def function_with_two_returns(spectrogram):
         return 'a', 'b'
     with pytest.raises(AssertionError):
         test_spectrogram_manipulation_returns_Spectrogram(function_with_two_returns, spect_ex)
@@ -370,7 +371,7 @@ def test_spect_manipulation_test_catches_Spectrogram_object_not_removed_from_man
 def test_spectrogram_test_passes_good_manipulation_addition(spect_ex):
     # Manipulation works exactly as it's supposed to
     possible_manipulations = ['function_that_works']
-    def function_that_works(spectrogram = None, another = 'default'):
+    def function_that_works(spectrogram, another = 'default'):
         arguments = locals()
         path = get_abs_path('silence_10s.mp3')
         audio = Audio(path = path, label='silence')

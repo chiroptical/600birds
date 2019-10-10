@@ -1,4 +1,5 @@
 # Audio module imports
+import inspect
 import librosa
 import os
 import numpy as np
@@ -232,10 +233,9 @@ def _audio_manipulation(func):
     
     Inputs:
       - func (function): a function with all arguments
-        provided as kwargs, with one argument called `audio`.
-        Function must return an Audio object and a list of
-        keyword arguments that does not include the  
-        reference to the manipulation Audio object
+        provided as kwargs, except one positional argument 
+        called `spectrogram`. This function must return 
+        a Spectrogram object.
     
     Returns:
       - wrapped version of the function that returns only 
@@ -248,22 +248,32 @@ def _audio_manipulation(func):
     
     @wraps(func) #Allows us to call help(func)
     def validate_audio(*args, **kwargs):
-        try:
-            audio_arg = kwargs['audio']
-        except KeyError:
-            try:
-                audio_arg = args[0]
-            except IndexError:
-                raise ValueError("an Audio object must be provided as first argument or keyword argument 'audio'")
-            
+        if 'audio' in kwargs.keys():
+            raise ValueError('audio must not be given as a keyword argument')
+        else:
+            audio_arg = args[0]
+        
         if not isinstance(audio_arg, Audio):
             raise ValueError("an Audio object must be provided as first argument or keyword argument 'audio'")
-            
+        
+        if len(args) > 1:
+            raise ValueError('only one argument, audio, can be positional.'
+                            'Others must be called as keyword arguments.'
+                            f'Got {len(args)} positional arguments.')
+
         # Run manipulation
-        manipulated_audio, arguments = func(*args, **kwargs)
+        manipulated_audio = func(audio_arg, **kwargs)
+        
+        # Create a dictionary of kwargs function was called with,
+        # including default kwargs if the default was used
+        param_dict = kwargs
+        for param in inspect.signature(func).parameters.values():
+            if param.name not in param_dict.keys():
+                if param.default is not param.empty:
+                    param_dict[param.name] = param.default
         
         # Add manipulation to list of manipulations
-        manipulated_audio.add_manipulation(func.__name__, arguments)
+        manipulated_audio.add_manipulation(func.__name__, param_dict)
         
         return manipulated_audio
     
@@ -373,9 +383,6 @@ def get_chunk(
         audio (Audio): manipulated audio object
         
     '''
-    # Get the given arguments
-    options = locals()
-    del options['audio']
     
     # Get a random start position
     num_samples = len(audio.samples)
@@ -422,7 +429,7 @@ def get_chunk(
         start_time = start_position_seconds,
         duration = seconds_to_extract)
     
-    return audio, options
+    return audio
 
 
 ####################################################
@@ -467,15 +474,11 @@ def cyclic_shift(audio, split_point = None):
         split_point: where to split the things
     '''
     
-    # Get the given arguments
-    options = locals()
-    del options['audio']
-    
     new_samples = _shift_array(audio.samples, split_point = split_point)
     
     audio.set_samples(new_samples)
     
-    return audio, options
+    return audio
 
 
 ####################################################
@@ -572,8 +575,6 @@ def time_stretch_divisions(
     Returns:
         stretched_divisions, time-stretched divisions
     '''
-    options = locals()
-    del options['audio']
     
     samples = audio.samples
     sample_rate = audio.sample_rate
@@ -599,7 +600,7 @@ def time_stretch_divisions(
     recombined = _combine_samples(stretched_divisions)
     audio.set_samples(recombined)
     
-    return audio, options
+    return audio
 
 @_audio_manipulation
 def pitch_shift_divisions(
@@ -636,10 +637,6 @@ def pitch_shift_divisions(
         shifted_divisions, pitch-shifted divisions
     '''
     
-    
-    options = locals()
-    del options['audio']
-    
     samples = audio.samples
     sample_rate = audio.sample_rate
     divisions = _divide_samples(
@@ -666,7 +663,7 @@ def pitch_shift_divisions(
     recombined = _combine_samples(shifted_divisions)
     audio.set_samples(recombined)
     
-    return audio, options
+    return audio
 
 ####################################################
 ################ Random audio filtering ############
@@ -699,9 +696,6 @@ def random_filter(
     If filter output contains values not between -1.0 and 1.0,
     the original signal is returned to avoid glitchy filters.
     '''
-    
-    options = locals()
-    del options['audio']
     
     from scipy.signal import butter, lfilter
     
@@ -739,7 +733,7 @@ def random_filter(
                ~(np.greater(filtered, 1, where=~np.isnan(filtered)).any()):
                 audio.set_samples(filtered)
     
-    return audio, options
+    return audio
 
 
 
@@ -960,8 +954,6 @@ def sum_chunks(
             be skipped. The number of samples skipped is between
             0 and the number of samples in the entire chunk
     '''
-    options = locals()
-    del options['audio']
     
     random.seed(seed)
     
@@ -1042,4 +1034,4 @@ def sum_chunks(
         for new_source in new_chunk.sources:
             audio.add_source(source = new_source)
     
-    return audio, options
+    return audio

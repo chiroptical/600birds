@@ -102,19 +102,26 @@ def test_Audio_add_source_actually_works_tuple(audio_ex):
 ### Tests for wrapper of manipulation functions ####
 ####################################################
 
-def test_audio_wrapper_arg_checking():
-    # Raise error if kwarg is not "audio" type
+def test_audio_wrapper_accepts_audio_arg(audio_ex):
     @_audio_manipulation
-    def function_with_good_kwarg(audio = None):
-        return None
+    def function_with_audio_arg(audio):
+        return audio
+    
+    function_with_audio_arg(audio_ex())
+    
+def test_audio_wrapper_audio_arg_cannot_be_kwarg(audio_ex):
+    @_audio_manipulation
+    def function_with_audio_kwarg(audio = None, audio_ex = audio_ex):
+        return audio_ex
     with pytest.raises(ValueError):
-        function_with_good_kwarg(audio = 'nope')
-
-    @_audio_manipulation 
-    def function_with_bad_kwarg(notaudio = None):
-        return None
+        function_with_audio_kwarg(audio = audio_ex())
+        
+def test_audio_wrapper_audio_arg_rejects_multiple_positional_args(audio_ex):
+    @_audio_manipulation
+    def function_with_multiple_positional_args(audio, another_positional):
+        return audio_ex
     with pytest.raises(ValueError):
-        function_with_bad_kwarg(notaudio = 'not')
+        function_with_multiple_positional_args(audio_ex(), 'another_positional_value')
 
         
 
@@ -132,7 +139,7 @@ def test_audio_manipulation_audio_is_arg(function):
 def test_audio_manipulation_returns_Audio(function, audio_ex):
     
     my_audio = audio_ex()
-    returned_audio = function(audio = my_audio)
+    returned_audio = function(my_audio)
     
     # Ensure function gave us the correct return
     assert isinstance(returned_audio, Audio)
@@ -140,7 +147,7 @@ def test_audio_manipulation_returns_Audio(function, audio_ex):
 @pytest.mark.parametrize('function', functional_audio_manipulations)
 def test_audio_manipulation_adds_manipulation(function, audio_ex):    
     my_audio = audio_ex()
-    returned_audio = function(audio = my_audio)
+    returned_audio = function(my_audio)
     manipulation_1 = returned_audio.manipulations[0]
     
     # Create a desired dictionary of default values
@@ -164,19 +171,19 @@ def test_audio_manipulation_test_catches_no_audio_arg():
 
 def test_audio_manipulation_test_catches_wrong_return_format(audio_ex):
     # Manipulation does not return correct type
-    def function_returning_wrong_type(audio = None):
+    def function_returning_wrong_type(audio):
         return True
     with pytest.raises(AssertionError):
         test_audio_manipulation_returns_Audio(function_returning_wrong_type, audio_ex)
     
-    def function_with_two_returns(audio = None):
+    def function_with_two_returns(audio):
         return 'a', 'b'
     with pytest.raises(AssertionError):
         test_audio_manipulation_returns_Audio(function_with_two_returns, audio_ex)
         
 def test_audio_manipulation_test_catches_audio_object_not_removed_from_manips(audio_ex):
     # Manipulation does not delete 'audio' object from arguments
-    def function_that_does_not_remove_audio_from_options(audio = None):
+    def function_that_does_not_remove_audio_from_options(audio):
         arguments = locals()
         audio.set_possible_manipulations(['function_that_does_not_remove_audio_from_options'])
         audio.add_manipulation('function_that_does_not_remove_audio_from_options', arguments)
@@ -188,7 +195,7 @@ def test_audio_manipulation_test_catches_audio_object_not_removed_from_manips(au
 # Manipulation works exactly as it's supposed to
 def test_audio_manipulation_test_passes_good_manipulation_addition(audio_ex):
     possible_manipulations = ['function_that_works']
-    def function_that_works(audio = None, another = 'default'):
+    def function_that_works(audio, another = 'default'):
         arguments = locals()
         del arguments['audio_ex']
         audio = audio_ex()

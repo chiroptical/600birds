@@ -335,7 +335,7 @@ def _spectrogram_manipulation(func):
             spect_arg = args[0]
         
         if not isinstance(spect_arg, Spectrogram):
-            raise ValueError(f"a Spectrogram object must be provided as argument spectrogram. Got {type(spect_arg)}")
+            raise ValueError(f"a Spectrogram object must be provided as first positional argument. Got {type(spect_arg)}")
         
         if len(args) > 1:
             raise ValueError('only one argument, spectrogram, can be positional.'
@@ -343,7 +343,7 @@ def _spectrogram_manipulation(func):
                             f'Got {len(args)} positional arguments.')
         
         # Run manipulation
-        manipulated_spect = func(*args, **kwargs)
+        manipulated_spect = func(spect_arg, **kwargs)
         
         # Create a dictionary of kwargs function was called with,
         # including default kwargs if the default was used

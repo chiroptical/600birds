@@ -998,7 +998,7 @@ def sum_chunks(
             
 
         # Randomly grab chunk from source
-        chunk_source == label_dict[label]
+        chunk_source = label_dict[label]
         new_chunk = _select_chunk(
             chunk_source = chunk_source,
             label = label,

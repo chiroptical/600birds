@@ -83,6 +83,11 @@ class InstList(Sequence):
     def __repr__(self):
         return str(self.instances)
     
+    def __add__(self, other):
+        if self.obj_type != other.obj_type:
+            raise ValueError("InstList's have different object types!")
+        return InstList(instances=self.instances + other.instances, obj_type=self.obj_type)
+    
     def apply_func(self, func, **kwargs):
         '''
         Apply a function to all instances in self.instances
